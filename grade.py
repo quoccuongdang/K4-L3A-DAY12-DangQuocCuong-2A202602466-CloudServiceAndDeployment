@@ -25,9 +25,21 @@ import os
 import sys
 from pathlib import Path
 
+if sys.platform == "win32":
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 import pytest
 
 ROOT = Path(__file__).parent
+
+# Tự động dùng python trong .venv nếu có và chưa kích hoạt
+_venv_py = ROOT / ".venv" / ("Scripts" if sys.platform == "win32" else "bin") / ("python.exe" if sys.platform == "win32" else "python")
+if _venv_py.exists() and Path(sys.executable).resolve() != _venv_py.resolve():
+    import subprocess
+    sys.exit(subprocess.call([str(_venv_py), *sys.argv]))
 
 # (mã, tên hiển thị, args pytest, điểm tối đa)
 CHECKPOINTS = [
